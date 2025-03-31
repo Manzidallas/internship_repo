@@ -1,35 +1,55 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from "react";
+import UserForm from "./components/UserForm";
+import UserList from "./components/UserList";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [users, setUsers] = useState(() => {
+    const savedUsers = localStorage.getItem("users");
+    return savedUsers ? JSON.parse(savedUsers) : [];
+  });
+
+  const [editingUser, setEditingUser] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem("users", JSON.stringify(users));
+  }, [users]);
+
+  const handleUserSubmit = (user) => {
+    if (editingUser !== null) {
+
+      const updatedUsers = users.map((u, index) =>
+        index === editingUser ? user : u
+      );
+      setUsers(updatedUsers);
+      setEditingUser(null);
+    } else {
+      setUsers([...users, user]);
+    }
+  };
+
+  const handleDeleteUser = (index) => {
+    const updatedUsers = users.filter((_, i) => i !== index);
+    setUsers(updatedUsers);
+  };
+
+  const handleEditUser = (index) => {
+    setEditingUser(index);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ padding: "20px" }}>
+      <h1>User Management System</h1>
+      <UserForm
+        onSubmit={handleUserSubmit}
+        editingUser={editingUser !== null ? users[editingUser] : null}
+      />
+      <UserList
+        users={users}
+        onEdit={handleEditUser}
+        onDelete={handleDeleteUser}
+      />
+    </div>
+  );
+};
 
-export default App
+export default App;
