@@ -26,3 +26,11 @@ exports.logout = (req, res) => {
     res.json({ message: 'Logout successful' });
   });
 };
+
+
+exports.checkAuth = (req, res) => {
+  if (req.session.user) {
+    return res.json({ authenticated: true, user: req.session.user });
+  }
+  return res.status(401).json({ authenticated: false });
+};
